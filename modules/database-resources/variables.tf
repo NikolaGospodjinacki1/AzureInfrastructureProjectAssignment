@@ -1,48 +1,48 @@
 variable "server_name" {
-   type = string
+  type = string
 }
 
 variable "resource_group_name" {
-   type = string
+  type = string
 }
 
 variable "location" {
-   type = string
+  type = string
 }
 
 variable "administrator_login" {
-   type = string
+  type = string
 }
 
 variable "administrator_login_password" {
-   type = string
-   sensitive   = true
+  type      = string
+  sensitive = true
 }
 
 variable "AD_admin_login_username" {
-   type = string
+  type = string
 }
 
 variable "vnet_rule_name" {
-   type = string
+  type = string
 }
 
 variable "vnet_rule_subnet_id" {
-   type = string
+  type = string
 }
 
 variable "db_name" {
-   type = string
+  type = string
 }
 
 variable "max_size_gb" {
-   type = number
+  type = number
 }
 
 variable "sku_name" {
-   type = string
+  type = string
 }
 
 variable "environment" {
-   type = string
+  type = string
 }

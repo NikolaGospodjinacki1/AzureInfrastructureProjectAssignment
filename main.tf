@@ -4,7 +4,7 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "=3.38.0"
     }
-     random = {
+    random = {
       source  = "hashicorp/random"
       version = "=3.4.3"
     }
@@ -21,9 +21,9 @@ data "azurerm_subscription" "current" {}
 data "azuread_client_config" "current" {} */
 
 module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "0.2.0"
-  suffix = [ "dev" ]
+  source                 = "Azure/naming/azurerm"
+  version                = "0.2.0"
+  suffix                 = ["dev"]
   unique-include-numbers = true
 }
 
@@ -80,38 +80,38 @@ resource "azuread_group" "projectadgroup1" {
 }
 
 resource "azurerm_role_assignment" "projectras-main" {
-  scope                = azurerm_resource_group.projectrg1.id 
+  scope                = azurerm_resource_group.projectrg1.id
   role_definition_name = "Contributor"
   principal_id         = azuread_group.projectadgroup1.object_id
 }
 
 resource "azurerm_role_assignment" "projectras-database" {
-  scope                = azurerm_resource_group.database.id 
+  scope                = azurerm_resource_group.database.id
   role_definition_name = "Contributor"
   principal_id         = azuread_group.projectadgroup1.object_id
 }
 
 resource "azurerm_role_assignment" "projectras-redis" {
-  scope                = azurerm_resource_group.redis.id 
+  scope                = azurerm_resource_group.redis.id
   role_definition_name = "Contributor"
   principal_id         = azuread_group.projectadgroup1.object_id
 }
 
 module "vault-resources" {
-  source = "./modules/vault-resources"
-  vault_name = "kv-project-${var.env}-${random_string.suffix.result}"
-  location = var.region
+  source              = "./modules/vault-resources"
+  vault_name          = "kv-project-${var.env}-${random_string.suffix.result}"
+  location            = var.region
   resource_group_name = azurerm_resource_group.projectrg1.name
-  sku_name = "standard"
-  virtual_network_subnet_ids = [ azurerm_subnet.projectprivsub1.id, 
-                                 azurerm_subnet.projectprivsub2.id,
-                                 azurerm_subnet.projectpubsub1.id,
-                                 azurerm_subnet.projectpubsub2.id ]
-  sql_username_secret_name = "kv-secret--${var.env}-sqluname-${random_string.suffix.result}" 
+  sku_name            = "standard"
+  virtual_network_subnet_ids = [azurerm_subnet.sqlapi.id,
+    azurerm_subnet.projectprivsub2.id,
+    azurerm_subnet.frontend.id,
+  azurerm_subnet.storagepriv.id]
+  sql_username_secret_name  = "kv-secret--${var.env}-sqluname-${random_string.suffix.result}"
   sql_username_secret_value = random_string.projectsqlrand1.result
-  sql_password_secret_name = "kv-secret--${var.env}-sqlpwd-${random_string.suffix.result}"
+  sql_password_secret_name  = "kv-secret--${var.env}-sqlpwd-${random_string.suffix.result}"
   sql_password_secret_value = random_password.projectsqlrand2.result
-  environment = var.env
+  environment               = var.env
 }
 
 # Create a virtual network within the resource group
@@ -125,8 +125,8 @@ resource "azurerm_virtual_network" "projectvnet1" {
   }
 }
 
-resource "azurerm_subnet" "projectpubsub1" {
-  name                 = "snet-project-${var.env}-${random_string.suffix.result}-pub1"
+resource "azurerm_subnet" "frontend" {
+  name                 = "snet-project-${var.env}-${random_string.suffix.result}-frontend"
   resource_group_name  = azurerm_resource_group.projectrg1.name
   virtual_network_name = azurerm_virtual_network.projectvnet1.name
   address_prefixes     = [var.subnet_ranges[0]]
@@ -135,18 +135,18 @@ resource "azurerm_subnet" "projectpubsub1" {
     name = "delegation"
 
     service_delegation {
-        actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action",
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        name    = "Microsoft.Web/serverFarms"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+      name = "Microsoft.Web/serverFarms"
     }
-  }  
-  
+  }
+
 }
 
-resource "azurerm_subnet" "projectpubsub2" {
-  name                 = "snet-project-${var.env}-${random_string.suffix.result}-pub2"
+resource "azurerm_subnet" "storagepriv" {
+  name                 = "snet-project-${var.env}-${random_string.suffix.result}-storagepriv"
   resource_group_name  = azurerm_resource_group.projectrg1.name
   virtual_network_name = azurerm_virtual_network.projectvnet1.name
   address_prefixes     = [var.subnet_ranges[1]]
@@ -155,32 +155,32 @@ resource "azurerm_subnet" "projectpubsub2" {
     name = "delegation"
 
     service_delegation {
-        actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action",
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        name    = "Microsoft.Web/serverFarms"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+      name = "Microsoft.Web/serverFarms"
     }
-  }  
+  }
 }
 
-resource "azurerm_subnet" "projectprivsub1" {
-  name                 = "snet-project-${var.env}-${random_string.suffix.result}-priv1"
+resource "azurerm_subnet" "sqlapi" {
+  name                 = "snet-project-${var.env}-${random_string.suffix.result}-sqlapi"
   resource_group_name  = azurerm_resource_group.projectrg1.name
   virtual_network_name = azurerm_virtual_network.projectvnet1.name
   address_prefixes     = [var.subnet_ranges[2]]
-  service_endpoints    = ["Microsoft.Storage","Microsoft.Sql", "Microsoft.KeyVault"]
+  service_endpoints    = ["Microsoft.Storage", "Microsoft.Sql", "Microsoft.KeyVault"]
   delegation {
     name = "delegation"
 
     service_delegation {
-        actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action",
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        name    = "Microsoft.Web/serverFarms"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+      name = "Microsoft.Web/serverFarms"
     }
-  }  
+  }
 }
 
 resource "azurerm_subnet" "projectprivsub2" {
@@ -188,21 +188,21 @@ resource "azurerm_subnet" "projectprivsub2" {
   resource_group_name  = azurerm_resource_group.projectrg1.name
   virtual_network_name = azurerm_virtual_network.projectvnet1.name
   address_prefixes     = [var.subnet_ranges[3]]
-  service_endpoints    = ["Microsoft.Storage","Microsoft.Sql", "Microsoft.KeyVault"]
+  service_endpoints    = ["Microsoft.Storage", "Microsoft.Sql", "Microsoft.KeyVault"]
   delegation {
     name = "delegation"
 
     service_delegation {
-        actions = [
-            "Microsoft.Network/virtualNetworks/subnets/action",
-            "Microsoft.Network/virtualNetworks/subnets/join/action"
-          ]
-        name    = "Microsoft.Web/serverFarms"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/action",
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+      name = "Microsoft.Web/serverFarms"
     }
-  }  
+  }
 }
 
-resource "azurerm_network_security_group" "projectsg1" {
+resource "azurerm_network_security_group" "frontendsg" {
   name                = "nsg-project-${var.env}-${random_string.suffix.result}1"
   location            = azurerm_resource_group.projectrg1.location
   resource_group_name = azurerm_resource_group.projectrg1.name
@@ -224,87 +224,87 @@ resource "azurerm_network_security_group" "projectsg1" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "projectsgassoc1" {
-  subnet_id                 = azurerm_subnet.projectpubsub1.id
-  network_security_group_id = azurerm_network_security_group.projectsg1.id
+  subnet_id                 = azurerm_subnet.frontend.id
+  network_security_group_id = azurerm_network_security_group.frontendsg.id
 }
 
 module "database-resources" {
-  source = "./modules/database-resources"
-  server_name = "sql-project-${var.env}-${random_string.suffix.result}"
-  resource_group_name = azurerm_resource_group.database.name
-  location = var.region
-  administrator_login = module.vault-resources.sql_username_secret_value
+  source                       = "./modules/database-resources"
+  server_name                  = "sql-project-${var.env}-${random_string.suffix.result}"
+  resource_group_name          = azurerm_resource_group.database.name
+  location                     = var.region
+  administrator_login          = module.vault-resources.sql_username_secret_value
   administrator_login_password = module.vault-resources.sql_password_secret_value
-  AD_admin_login_username = "AzureAD Admin"
-  vnet_rule_name = "vnet-rule-project-${var.env}-${random_string.suffix.result}"
-  vnet_rule_subnet_id = azurerm_subnet.projectprivsub1.id
-  db_name = "sqldb-project-${var.env}-${random_string.suffix.result}"
-  max_size_gb = var.max_db_size
-  sku_name = var.db_sku
-  environment = var.env
+  AD_admin_login_username      = "AzureAD Admin"
+  vnet_rule_name               = "vnet-rule-project-${var.env}-${random_string.suffix.result}"
+  vnet_rule_subnet_id          = azurerm_subnet.sqlapi.id
+  db_name                      = "sqldb-project-${var.env}-${random_string.suffix.result}"
+  max_size_gb                  = var.max_db_size
+  sku_name                     = var.db_sku
+  environment                  = var.env
 }
 module "application-resources-a" {
-  source = "./modules/application-resources"
-  asp_name = "asp-project-${var.env}-${random_string.suffix.result}1"
-  resource_group = azurerm_resource_group.projectrg1.name
-  location = azurerm_resource_group.projectrg1.location
-  sku_name = "B1"
-  app_name = "app-project-${var.env}-${random_string.suffix.result}1"
-  app_subnet = azurerm_subnet.projectpubsub1.id
+  source          = "./modules/application-resources"
+  asp_name        = "asp-project-${var.env}-${random_string.suffix.result}1"
+  resource_group  = azurerm_resource_group.projectrg1.name
+  location        = azurerm_resource_group.projectrg1.location
+  sku_name        = "B1"
+  app_name        = "app-project-${var.env}-${random_string.suffix.result}1"
+  app_subnet      = azurerm_subnet.frontend.id
   managed_id_role = "Contributor"
-  environment = var.env
+  environment     = var.env
 }
 
 module "application-resources-b" {
-  source = "./modules/application-resources"
-  asp_name = "asp-project-${var.env}-${random_string.suffix.result}2"
-  resource_group = azurerm_resource_group.projectrg1.name
-  location = azurerm_resource_group.projectrg1.location
-  sku_name = "B1"
-  app_name = "app-project-${var.env}-${random_string.suffix.result}2"
-  app_subnet = azurerm_subnet.projectprivsub1.id
+  source          = "./modules/application-resources"
+  asp_name        = "asp-project-${var.env}-${random_string.suffix.result}2"
+  resource_group  = azurerm_resource_group.projectrg1.name
+  location        = azurerm_resource_group.projectrg1.location
+  sku_name        = "B1"
+  app_name        = "app-project-${var.env}-${random_string.suffix.result}2"
+  app_subnet      = azurerm_subnet.sqlapi.id
   managed_id_role = "Contributor"
-  environment = var.env
+  environment     = var.env
 }
 
-module storage_resources_API {
-  source = "./modules/storage-resources"
-  storage_account_name = "stproject${var.env}${random_string.suffix.result}api"
-  resource_group_name = azurerm_resource_group.projectrg1.name
-  location = var.region
-  account_tier = "Standard"
+module "storage_resources_API" {
+  source                   = "./modules/storage-resources"
+  storage_account_name     = "stproject${var.env}${random_string.suffix.result}api"
+  resource_group_name      = azurerm_resource_group.projectrg1.name
+  location                 = var.region
+  account_tier             = "Standard"
   account_replication_type = "LRS"
-  vnet_subnet_ids = [ azurerm_subnet.projectpubsub2.id ]
-  environment = var.env
-  container_name = "stapi"
-  container_access_type = "private"
-} 
+  vnet_subnet_ids          = [azurerm_subnet.storagepriv.id]
+  environment              = var.env
+  container_name           = "stapi"
+  container_access_type    = "private"
+}
 
-module storage_resources_TFSTATE {
-  source = "./modules/storage-resources"
-  storage_account_name = "stproject${var.env}${random_string.suffix.result}tfstate"
-  resource_group_name = azurerm_resource_group.projectrg1.name
-  location = var.region
-  account_tier = "Standard"
+module "storage_resources_TFSTATE" {
+  source                   = "./modules/storage-resources"
+  storage_account_name     = "stproject${var.env}${random_string.suffix.result}tfstate"
+  resource_group_name      = azurerm_resource_group.projectrg1.name
+  location                 = var.region
+  account_tier             = "Standard"
   account_replication_type = "LRS"
-  vnet_subnet_ids = [ azurerm_subnet.projectpubsub2.id ]
-  environment = var.env
-  container_name = "sttfstate"
-  container_access_type = "private"
-} 
+  vnet_subnet_ids          = [azurerm_subnet.storagepriv.id]
+  environment              = var.env
+  container_name           = "sttfstate"
+  container_access_type    = "private"
+}
 
 module "redis-resources" {
-  source = "./modules/redis-resources"
-  name = "redis-project-${var.env}-${random_string.suffix.result}1"
-  location = var.region
-  resource_group_name = azurerm_resource_group.redis.name
-  capacity = 0
-  family = "C"
-  sku_name = "Basic"
-  environment = var.env
-  dns_zone_name = "project.privatelink.redis.cache.windows.net"
+  source                             = "./modules/redis-resources"
+  name                               = "redis-project-${var.env}-${random_string.suffix.result}1"
+  location                           = var.region
+  resource_group_name                = azurerm_resource_group.redis.name
+  capacity                           = 0
+  family                             = "C"
+  sku_name                           = "Basic"
+  environment                        = var.env
+  dns_zone_name                      = "project.privatelink.redis.cache.windows.net"
   dns_zone_virtual_network_link_name = "project-redis"
-  virtual_network_id = azurerm_virtual_network.projectvnet1.id
+  virtual_network_id                 = azurerm_virtual_network.projectvnet1.id
 }
 
 

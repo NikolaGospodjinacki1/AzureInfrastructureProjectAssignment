@@ -5,10 +5,10 @@ resource "azurerm_storage_account" "projectsa1" {
   location                 = var.location
   account_tier             = var.account_tier
   account_replication_type = var.account_replication_type
-  
+
   network_rules {
-    default_action = "Allow"
-    bypass = ["AzureServices"]
+    default_action             = "Allow"
+    bypass                     = ["AzureServices"]
     virtual_network_subnet_ids = var.vnet_subnet_ids
   }
   tags = {

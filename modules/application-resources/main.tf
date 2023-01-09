@@ -16,10 +16,10 @@ resource "azurerm_windows_web_app" "projectapp1" {
   service_plan_id     = azurerm_service_plan.projectsp1.id
   site_config {
     #always_on = false
-    application_stack{
-    current_stack = "dotnet"
-    dotnet_version = "v6.0"
-  }
+    application_stack {
+      current_stack  = "dotnet"
+      dotnet_version = "v6.0"
+    }
   }
   identity {
     type = "SystemAssigned"
@@ -35,7 +35,7 @@ resource "azurerm_app_service_virtual_network_swift_connection" "projectappvncon
 }
 
 resource "azurerm_role_assignment" "projectras1" {
-  principal_id = azurerm_windows_web_app.projectapp1.identity[0].principal_id
-  scope = data.azurerm_subscription.current.id
+  principal_id         = azurerm_windows_web_app.projectapp1.identity[0].principal_id
+  scope                = data.azurerm_subscription.current.id
   role_definition_name = var.managed_id_role
 }

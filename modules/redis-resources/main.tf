@@ -18,6 +18,9 @@ resource "azurerm_private_dns_zone" "redis" {
   tags = {
     environment = var.environment
   }
+  depends_on = [
+    azurerm_redis_cache.projectredis1
+  ]
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "redis" {
@@ -25,4 +28,5 @@ resource "azurerm_private_dns_zone_virtual_network_link" "redis" {
   private_dns_zone_name = azurerm_private_dns_zone.redis.name
   virtual_network_id    = var.virtual_network_id
   resource_group_name   = var.resource_group_name
+
 }

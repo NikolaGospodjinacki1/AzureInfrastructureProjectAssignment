@@ -142,7 +142,6 @@ resource "azurerm_subnet" "frontend" {
       name = "Microsoft.Web/serverFarms"
     }
   }
-
 }
 
 resource "azurerm_subnet" "storagepriv" {
@@ -223,7 +222,33 @@ resource "azurerm_network_security_group" "frontendsg" {
   }
 }
 
-resource "azurerm_subnet_network_security_group_association" "projectsgassoc1" {
+/* resource "azurerm_network_security_group" "backendsg" {
+  name                = "nsg-project-${var.env}-${random_string.suffix.result}1"
+  location            = azurerm_resource_group.projectrg1.location
+  resource_group_name = azurerm_resource_group.projectrg1.name
+
+  security_rule {
+    name                       = "Deny-all-backend"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+  tags = {
+    subnet = "backend"
+  }
+} */
+
+/* resource "azurerm_subnet_network_security_group_association" "projectsgassocfe" {
+  subnet_id                 = azurerm_subnet.sqlapi.id
+  network_security_group_id = azurerm_network_security_group.backendsg.id
+} */
+
+resource "azurerm_subnet_network_security_group_association" "projectsgassocbe" {
   subnet_id                 = azurerm_subnet.frontend.id
   network_security_group_id = azurerm_network_security_group.frontendsg.id
 }

@@ -268,25 +268,25 @@ module "database-resources" {
   sku_name                     = var.db_sku
   environment                  = var.env
 }
-module "application-resources-a" {
+module "application-resources-fe" {
   source          = "./modules/application-resources"
-  asp_name        = "asp-project-${var.env}-${random_string.suffix.result}1"
+  asp_name        = "asp-project-${var.env}-${random_string.suffix.result}1fe"
   resource_group  = azurerm_resource_group.projectrg1.name
   location        = azurerm_resource_group.projectrg1.location
   sku_name        = "B1"
-  app_name        = "app-project-${var.env}-${random_string.suffix.result}1"
+  app_name        = "app-project-${var.env}-${random_string.suffix.result}1fe"
   app_subnet      = azurerm_subnet.frontend.id
   managed_id_role = "Contributor"
   environment     = var.env
 }
 
-module "application-resources-b" {
+module "application-resources-be" {
   source          = "./modules/application-resources"
-  asp_name        = "asp-project-${var.env}-${random_string.suffix.result}2"
+  asp_name        = "asp-project-${var.env}-${random_string.suffix.result}2be"
   resource_group  = azurerm_resource_group.projectrg1.name
   location        = azurerm_resource_group.projectrg1.location
   sku_name        = "B1"
-  app_name        = "app-project-${var.env}-${random_string.suffix.result}2"
+  app_name        = "app-project-${var.env}-${random_string.suffix.result}2be"
   app_subnet      = azurerm_subnet.sqlapi.id
   managed_id_role = "Contributor"
   environment     = var.env
@@ -305,7 +305,7 @@ module "storage_resources_API" {
   container_access_type    = "private"
 }
 
-module "storage_resources_TFSTATE" {
+/* module "storage_resources_TFSTATE" {
   source                   = "./modules/storage-resources"
   storage_account_name     = "stproject${var.env}${random_string.suffix.result}tfstate"
   resource_group_name      = azurerm_resource_group.projectrg1.name
@@ -316,7 +316,7 @@ module "storage_resources_TFSTATE" {
   environment              = var.env
   container_name           = "sttfstate"
   container_access_type    = "private"
-}
+} */
 
 module "redis-resources" {
   source                             = "./modules/redis-resources"

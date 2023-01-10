@@ -30,3 +30,9 @@ variable "subnet_ranges" {
     "10.0.3.0/24",
   "10.0.4.0/24"]
 }
+
+variable "spn-client-id" {}
+
+variable "spn-client-secret" {}
+
+variable "spn-tenant-id" {}

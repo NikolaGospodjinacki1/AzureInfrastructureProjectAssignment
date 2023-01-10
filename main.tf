@@ -13,6 +13,9 @@ terraform {
 
 provider "azurerm" {
   features {}
+  client_id = var.spn-client_id
+  client_secret = var.spn-client-secret
+  tenant_id = var.spn-tenant-id
 }
 
 data "azurerm_client_config" "current" {}

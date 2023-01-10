@@ -15,8 +15,8 @@ variable "sku_name" {
 }
 
 variable "ip_rules" {
-  type    = string
-  default = "188.2.186.19"
+  type    = list(string)
+  default = [ "40.74.28.0/23", "188.2.186.19"]  #Azure devops IP range, local ip
 }
 
 variable "virtual_network_subnet_ids" {

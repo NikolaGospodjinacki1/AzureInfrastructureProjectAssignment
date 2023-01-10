@@ -14,7 +14,7 @@ resource "azurerm_key_vault" "projectkv1" {
   network_acls {
     bypass                     = "AzureServices"
     default_action             = "Deny"
-    ip_rules                   = [var.ip_rules] #Home IP allow
+    ip_rules                   = var.ip_rules #Home IP allow
     virtual_network_subnet_ids = var.virtual_network_subnet_ids
   }
   access_policy {

@@ -17,9 +17,9 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
-  client_id = var.spn-client_id
+  /* client_id = var.spn-client_id
   client_secret = var.spn-client-secret
-  tenant_id = var.spn-tenant-id
+  tenant_id = var.spn-tenant-id */
 }
 
 data "azurerm_client_config" "current" {}

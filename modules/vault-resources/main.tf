@@ -42,12 +42,29 @@ resource "azurerm_key_vault" "projectkv1" {
   }
 }
 
+resource "azurerm_private_endpoint" "main" {
+  name                = "${azurerm_key_vault.projectkv1.name}-pe"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  subnet_id           = var.virtual_network_subnet_ids[0]
+  private_dns_zone_group {
+    name                 = "devtest"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
+  private_service_connection {
+    is_manual_connection           = false
+    private_connection_resource_id = azurerm_key_vault.projectkv1.id
+    name                           = "${azurerm_key_vault.projectkv1.name}-psc"
+    subresource_names              = ["vault"]
+  }
+  depends_on = [azurerm_key_vault.projectkv1]
+}
+
 # # Create KeyVault Secret
 resource "azurerm_key_vault_secret" "projectsqlusername1" {
   name         = var.sql_username_secret_name
   value        = var.sql_username_secret_value
   key_vault_id = azurerm_key_vault.projectkv1.id
-  depends_on   = [azurerm_key_vault.projectkv1]
   tags = {
     "environent" = var.environment
   }
@@ -57,7 +74,6 @@ resource "azurerm_key_vault_secret" "projectsqlpassword1" {
   name         = var.sql_password_secret_name
   value        = var.sql_password_secret_value
   key_vault_id = azurerm_key_vault.projectkv1.id
-  depends_on   = [azurerm_key_vault.projectkv1]
   tags = {
     "environent" = var.environment
   }

@@ -12,21 +12,22 @@ resource "azurerm_redis_cache" "projectredis1" {
   }
 }
 
-resource "azurerm_private_dns_zone" "redis" {
-  name                = var.dns_zone_name
+resource "azurerm_private_endpoint" "redis_pe" {
+  name                = var.endpoint_name
+  location            = var.location
   resource_group_name = var.resource_group_name
-  tags = {
-    environment = var.environment
+  subnet_id           = var.endpoint_subnet_id
+
+  private_service_connection {
+    name                           = var.priv_svc_connection_name
+    private_connection_resource_id = azurerm_redis_cache.projectredis1.id
+    subresource_names              = ["redisCache"]
+    is_manual_connection           = false
   }
-  depends_on = [
-    azurerm_redis_cache.projectredis1
-  ]
+
+  private_dns_zone_group {
+    name                 = var.private_dns_zone_name
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "redis" {
-  name                  = var.dns_zone_virtual_network_link_name
-  private_dns_zone_name = azurerm_private_dns_zone.redis.name
-  virtual_network_id    = var.virtual_network_id
-  resource_group_name   = var.resource_group_name
-
-}

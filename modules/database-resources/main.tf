@@ -11,10 +11,6 @@ resource "azurerm_mssql_server" "projectsqlsrv1" {
   administrator_login_password = var.administrator_login_password
   #public_network_access_enabled = false
 
-  azuread_administrator {
-    login_username = var.AD_admin_login_username
-    object_id      = data.azurerm_client_config.current.object_id
-  }
   identity {
     type = "SystemAssigned"
   }
@@ -42,6 +38,26 @@ resource "azurerm_mssql_database" "projectsqldb1" {
   }
 }
 
+resource "azurerm_private_endpoint" "sql_server_pe" {
+  name                = var.endpoint_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.endpoint_subnet_id
+
+  private_service_connection {
+    name                           = var.priv_svc_connection_name
+    private_connection_resource_id = azurerm_mssql_server.projectsqlsrv1.id
+    subresource_names              = ["sqlServer"]
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = var.private_dns_zone_name
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
+}
+
+
 resource "azurerm_role_assignment" "projectras3" {
   principal_id         = azurerm_mssql_server.projectsqlsrv1.identity[0].principal_id
   scope                = data.azurerm_subscription.current.id
@@ -53,4 +69,11 @@ resource "azurerm_mssql_firewall_rule" "projectfr1" {
   server_id        = azurerm_mssql_server.projectsqlsrv1.id
   start_ip_address = "188.2.186.19"
   end_ip_address   = "188.2.186.19"
+}
+
+resource "azurerm_mssql_firewall_rule" "projectfr2" {
+  name             = "Allow access to db from Levi9 VPN"
+  server_id        = azurerm_mssql_server.projectsqlsrv1.id
+  start_ip_address = "82.117.202.34"
+  end_ip_address   = "82.117.202.34"
 }

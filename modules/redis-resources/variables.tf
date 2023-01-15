@@ -26,14 +26,22 @@ variable "environment" {
   type = string
 }
 
-variable "dns_zone_name" {
+variable "endpoint_name" {
   type = string
 }
 
-variable "dns_zone_virtual_network_link_name" {
+variable "endpoint_subnet_id" {
   type = string
 }
 
-variable "virtual_network_id" {
+variable "priv_svc_connection_name" {
   type = string
+}
+
+variable "private_dns_zone_name" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = list(string)
 }

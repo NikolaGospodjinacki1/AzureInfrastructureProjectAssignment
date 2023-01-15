@@ -30,6 +30,10 @@ variable "container_name" {
   type = string
 }
 
+variable "allowed_ips" {
+  type = list(string)
+}
+
 variable "container_access_type" {
   type = string
 }

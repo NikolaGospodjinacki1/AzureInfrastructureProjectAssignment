@@ -19,10 +19,6 @@ variable "administrator_login_password" {
   sensitive = true
 }
 
-variable "AD_admin_login_username" {
-  type = string
-}
-
 variable "vnet_rule_name" {
   type = string
 }
@@ -41,6 +37,26 @@ variable "max_size_gb" {
 
 variable "sku_name" {
   type = string
+}
+
+variable "endpoint_name" {
+  type = string
+}
+
+variable "endpoint_subnet_id" {
+  type = string
+}
+
+variable "priv_svc_connection_name" {
+  type = string
+}
+
+variable "private_dns_zone_name" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = list(string)
 }
 
 variable "environment" {

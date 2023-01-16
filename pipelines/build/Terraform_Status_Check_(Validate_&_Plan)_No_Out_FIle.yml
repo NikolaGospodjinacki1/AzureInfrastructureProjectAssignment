@@ -1,27 +1,57 @@
-variables:
-  - group: kv-project-dev-82uc
-
-jobs:
-  - job: Job_1
-    displayName: Terraform Status Check (Validate & Plan - No Out FIle)
-    pool:
-      vmImage: ubuntu-20.04
-    steps:
-      - checkout: self
-        fetchDepth: 1
-      - task: TerraformInstaller@0
-        displayName: Install Terraform 1.3.7
-        inputs:
-          terraformVersion: 1.3.7
-      - task: CmdLine@2
-        displayName: Terraform init
-        inputs:
-          script: terraform init -backend-config="access_key=$(stterraformstate4321-key1)"
-      - task: CmdLine@2
-        displayName: Terraform Validate
-        inputs:
-          script: terraform validate
-      - task: CmdLine@2
-        displayName: Terraform Plan
-        inputs:
-          script: terraform plan -input=false -var="spn-client-id=$(tf-project-pipeline-spn-client-id)" -var="spn-client-secret=$(tf-project-pipeline-spn-secret) -var="spn-tenant-id=$(tf-project-pipeline-spn-tenant-id)"
+stages:
+  - stage: Terraform Apply
+    displayName: Terraform Apply and Destroy
+    jobs:
+      - job: Terraform_Apply
+        displayName: Terraform Apply
+        steps:
+          - task: ExtractFiles@1
+            displayName: "Extract files "
+            inputs:
+              archiveFilePatterns: $(System.ArtifactsDirectory)/_Terraform Plan/$(Build.BuildId)-tfplan/$(Build.BuildId)-tfplan.tgz
+              destinationFolder: $(System.DefaultWorkingDirectory)/
+              cleanDestinationFolder: false
+          - task: CmdLine@2
+            displayName: Command Line Script
+            inputs:
+              script: ls $(System.DefaultWorkingDirectory)/
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: Install Terraform 1.3.7
+            inputs:
+              terraformVersion: 1.3.7
+          - task: CmdLine@2
+            displayName: Terraform Init
+            inputs:
+              script: terraform init -backend-config="access_key=$(stterraformstate4321-key1)"
+              workingDirectory: $(System.DefaultWorkingDirectory)/s/
+          - task: CmdLine@2
+            displayName: Terraform Apply
+            inputs:
+              script: terraform apply -auto-approve -input=false tfplan
+              workingDirectory: $(System.DefaultWorkingDirectory)/s/
+  - stage: Terraform Destroy
+    displayName: Terraform Apply and Destroy
+    jobs:
+      - job: Terraform_Apply
+        displayName: Terraform Apply
+        steps:
+          - task: ExtractFiles@1
+            displayName: "Extract files "
+            inputs:
+              archiveFilePatterns: $(System.ArtifactsDirectory)/_TerraformPlan$(Build.BuildId)-tfplan/$(Build.BuildId)-tfplan.tgz
+              destinationFolder: $(System.DefaultWorkingDirectory)/
+              cleanDestinationFolder: false
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: Install Terraform 1.3.7
+            inputs:
+              terraformVersion: 1.3.7
+          - task: CmdLine@2
+            displayName: Terraform Init
+            inputs:
+              script: terraform init -backend-config="access_key=$(stdevtfstate12-key1)"
+              workingDirectory: $(System.DefaultWorkingDirectory)/
+          - task: CmdLine@2
+            displayName: Terraform Destroy
+            inputs:
+              script: terraform destroy -auto-approve
+              workingDirectory: $(System.DefaultWorkingDirectory)/

@@ -37,4 +37,4 @@ private_dns_zones = {
   privatelink-redis-windows-net     = "privatelink.redis.cache.windows.net"
 }
 
-subscription_id = "09d7927e-346e-45cc-ace4-c17cd778f190"
+/* subscription_id = "09d7927e-346e-45cc-ace4-c17cd778f190" */

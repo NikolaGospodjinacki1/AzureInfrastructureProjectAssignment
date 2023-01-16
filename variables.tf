@@ -31,8 +31,8 @@ variable "private_dns_zones" {
   type = map(any)
 }
 
-/* variable "spn-client-id" {}
+variable "spn-client-id" {}
 
 variable "spn-client-secret" {}
 
-variable "spn-tenant-id" {} */
+variable "spn-tenant-id" {}

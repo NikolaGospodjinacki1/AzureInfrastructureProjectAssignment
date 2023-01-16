@@ -17,16 +17,16 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
-  subscription_id = var.subscription_id
+  /* subscription_id = var.subscription_id
   client_id = var.spn-client-id
   client_secret = var.spn-client-secret
-  tenant_id = var.spn-tenant-id
+  tenant_id = var.spn-tenant-id */
 }
 
 provider "azuread" {
-  client_id = var.spn-client-id
+  /* client_id = var.spn-client-id
   client_secret = var.spn-client-secret
-  tenant_id = var.spn-tenant-id
+  tenant_id = var.spn-tenant-id */
 }
 
 data "azurerm_client_config" "current" {}
@@ -237,8 +237,6 @@ module "storage_resources_API" {
   container_access_type    = "private"
 }
 
-
-
 module "redis-resources" {
   source                             = "./modules/redis-resources"
   name                               = "redis-project-${var.env}-${random_string.suffix.result}1"
@@ -283,7 +281,6 @@ resource "azurerm_subnet_network_security_group_association" "frontend-asoc" {
   network_security_group_id = azurerm_network_security_group.frontendsg.id
 }
 
-
 resource "azurerm_network_security_group" "frontvnet-to-backprivend" {
   name                = "nsg-project-${var.env}-${random_string.suffix.result}-fe-to-be"
   location            = var.region
@@ -320,7 +317,6 @@ resource "azurerm_network_security_rule" "front-to-back-deny" {
   resource_group_name         = azurerm_resource_group.groups["networking"].name
   network_security_group_name = azurerm_network_security_group.frontvnet-to-backprivend.name
 }
-
 
 resource "azurerm_subnet_network_security_group_association" "front-to-back-asoc" {
   subnet_id                 = module.networking.snet-project-appservice-fe-vnet-id
@@ -368,85 +364,3 @@ resource "azurerm_subnet_network_security_group_association" "back-to-redis-asso
   subnet_id                 = module.networking.snet-project-appservice2-be-vnet-id
   network_security_group_id = azurerm_network_security_group.backvnet-redis.id
 }
-/* resource "azurerm_resource_group" "networking" {
-  name     = "rg-project-${var.env}-${random_string.suffix.result}networking"
-  location = var.region
-}
-*/
-
-/* resource "azurerm_role_assignment" "projectras-database" {
-  scope                = azurerm_resource_group.database.id
-  role_definition_name = "Contributor"
-  principal_id         = azuread_group.projectadgroup1.object_id
-} */
-
-/* resource "azurerm_role_assignment" "projectras-main" {
-  scope                = module.storage_resources_API.storage_account_id
-  role_definition_name = "Contributor"
-  principal_id         = module.application-resources-be.web_app_obj_id
-} */
-
-/* module "storage_resources_TFSTATE" {
-  source                   = "./modules/storage-resources"
-  storage_account_name     = "stproject${var.env}${random_string.suffix.result}tfstate"
-  resource_group_name      = azurerm_resource_group.projectrg1.name
-  location                 = var.region
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  vnet_subnet_ids          = [azurerm_subnet.storagepriv.id]
-  environment              = var.env
-  container_name           = "sttfstate"
-  container_access_type    = "private"
-} */
-
-/* resource "azurerm_subnet" "app-service-fe-vnet123" {
-  name                 = "snet-project-${var.env}-${random_string.suffix.result}-appservice1-vnet"
-  resource_group_name  = azurerm_resource_group.groups["networking"].name
-  virtual_network_name = azurerm_virtual_network.projectvnet1.name
-  address_prefixes     = [var.subnet_ranges[0]]
-  service_endpoints    = [ "Microsoft.Web" ]
-  delegation {
-    name = "delegation"
-
-    service_delegation {
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/action",
-        "Microsoft.Network/virtualNetworks/subnets/join/action"
-      ]
-      name = "Microsoft.Web/serverFarms"
-    }
-  }
-} */
-
-
-
-/* resource "azurerm_network_security_group" "backendsg" {
-  name                = "nsg-project-${var.env}-${random_string.suffix.result}1"
-  location            = azurerm_resource_group.projectrg1.location
-  resource_group_name = azurerm_resource_group.projectrg1.name
-
-  security_rule {
-    name                       = "Deny-all-backend"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  tags = {
-    subnet = "backend"
-  }
-} */
-
-/* resource "azurerm_subnet_network_security_group_association" "projectsgassocfe" {
-  subnet_id                 = azurerm_subnet.sqlapi.id
-  network_security_group_id = azurerm_network_security_group.backendsg.id
-} */
-
-/* resource "azurerm_subnet_network_security_group_association" "projectsgassocbe" {
-  subnet_id                 = azurerm_subnet.services.id
-  network_security_group_id = azurerm_network_security_group.frontendsg.id
-} */

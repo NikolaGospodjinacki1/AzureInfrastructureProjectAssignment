@@ -28,7 +28,7 @@ jobs:
       - task: CmdLine@2
         displayName: Terraform Plan
         inputs:
-          script: terraform plan -input=false -out=tfplan -var="spn-client-id=$(tf-project-pipeline-spn-client-id)" -var="spn-client-secret=$(tf-project-pipeline-spn-secret) -var="spn-tenant-id=$(tf-project-pipeline-spn-tenant-id)"
+          script: terraform plan -input=false -out=tfplan -var="spn-client-id=$(tf-project-pipeline-spn-client-id)" -var="spn-client-secret=$(tf-project-pipeline-spn-secret)" -var="spn-tenant-id=$(tf-project-pipeline-spn-tenant-id)"
       - task: ArchiveFiles@2
         displayName: Archive Terraform Plan Files
         inputs:

@@ -22,6 +22,10 @@ provider "azurerm" {
   tenant_id = var.spn-tenant-id
 }
 
+provider "azuread" {
+  tenant_id = var.spn-tenant-id
+}
+
 data "azurerm_client_config" "current" {}
 data "azurerm_subscription" "current" {}
 
